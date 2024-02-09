@@ -1,0 +1,1 @@
+export const HELLO_WORLD_FORM_KEY_CONFIG = {};

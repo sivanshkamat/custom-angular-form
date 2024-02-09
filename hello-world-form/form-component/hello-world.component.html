@@ -1,0 +1,24 @@
+<ng-container header>
+  <h6 class="app-toolbar__title">
+    <button class="mr-4" mat-icon-button (click)="cancel()" type="button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span>{{ constants.title | translate }}</span>
+  </h6>
+</ng-container>
+<ng-container form *ngIf="helloWorldForm">
+  <form [formGroup]="helloWorldForm" (submit)="submitForm()">
+    <div class="page-card__form-body">
+      <!-- Add input and other fields herer -->
+    </div>
+    <div class="page-card__form-actions">
+      <button type="button" (click)="cancel()" color="warn" mat-flat-button>
+        {{ constants.actions.cancel | translate }}
+      </button>
+      <button mat-flat-button type="submit" color="primary">
+        {{ constants.actions.save | translate }}
+      </button>
+    </div>
+  </form>
+</ng-container>
+  

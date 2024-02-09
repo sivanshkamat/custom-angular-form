@@ -6,17 +6,17 @@ const upperSnakeCase = componentName.toUpperCase().replace(/-/g, '_');
 const pascalCaseWithSpace = componentName.toLocaleUpperCase().replace(/-/g, ' ');
 
 // Function to generate content for models file
-function generateModelsContent(file) {
-    switch (file) {
-      case 'form.model.ts':
-        return `export interface ${pascalCase}Form {}
-  `;
-      default:
-        return '';
-    }
+function generateModelsContent(file, keyNames, keyTypes) {
+  let content = `export interface ${pascalCase}Form {\n`;
+  for (let i = 0; i < keyNames.length; i++) {
+    content += `  ${keyNames[i]}: ${keyTypes[i]};\n`;
   }
+  content += `}\n`;
 
-  module.exports = {
-    generateModelsContent
-  }
-  
+  return content;
+}
+
+
+module.exports = {
+  generateModelsContent
+}
