@@ -23,7 +23,7 @@ if (!componentName) {
 }
 
 const parentFolder = `${componentName}-form`;
-const folders = ['form-component', 'constants', 'services', 'store', 'key-config', 'models', 'fake-test-data'];
+const folders = ['form-component', 'constants', 'services', 'store', 'models', 'key-config', 'fake-test-data'];
 const nestedFolders = {
   services: ['api', 'form'],
   store: ['effects', 'reducers', 'selectors']

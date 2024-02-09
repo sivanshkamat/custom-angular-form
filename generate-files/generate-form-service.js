@@ -15,7 +15,7 @@ function generateFormServiceContent(file) {
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { MessageHandlerService } from '@core/services/message-handler/message-handler.service';
-import { ${upperSnakeCase}_FORM_CONSTANTS } from '../../constants/${componentName}-constants';
+import { ${upperSnakeCase}_FORM_KEY_CONFIG } from '../../key-config/${componentName}-key-config';
 import * as formActions from '../../store/${componentName}.actions';
 import { ${pascalCase}Form } from '../../models/${componentName}-form.model';
 import { Router } from '@angular/router';
@@ -44,7 +44,7 @@ export class ${pascalCase}FormService {
   }
 
   buildForm(): void {
-    this.#formGroup = this.fb.group(${upperSnakeCase}_FORM_CONSTANTS);
+    this.#formGroup = this.fb.group(${upperSnakeCase}_FORM_KEY_CONFIG);
   }
 
   resetForm(): void {
