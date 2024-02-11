@@ -14,6 +14,7 @@ const modelFun = require('./generate-files/generate-model');
 const effectFun = require('./generate-files/generate-effects');
 const fakeFun = require('./generate-files/generate-fake');
 const moduleFun = require('./generate-files/generate-module-content');
+const updateRouteFun = require('./update-routing-module')
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -22,6 +23,7 @@ const rl = readline.createInterface({
 
 let keyNames = [];
 let keyTypes = [];
+let isKeyDropDown = [];
 
 rl.question('Enter the number of keys: ', (numberOfKeys) => {
   const keysCount = parseInt(numberOfKeys);
@@ -36,14 +38,17 @@ rl.question('Enter the number of keys: ', (numberOfKeys) => {
   const askKeyInfo = () => {
     rl.question(`Enter Key Name ${count + 1}: `, (keyName) => {
       keyNames.push(keyName);
-      rl.question(`Enter Key Type for ${keyName}: `, (keyType) => {
+      rl.question(`Enter Key Type for ${keyName} (number/string/boolean): `, (keyType) => {
         keyTypes.push(keyType);
-        count++;
-        if (count < numberOfKeys) askKeyInfo();
-        else {
-          generateFiles();
-          rl.close();
-        }
+        rl.question(`Is ${keyName} a dropdown? (yes/no): `, (answer) => {
+          isKeyDropDown.push(answer.toLowerCase() === 'yes');
+          count++;
+          if (count < numberOfKeys) askKeyInfo();
+          else {
+            generateFiles();
+            rl.close();
+          }
+        });
       });
     });
   };
@@ -55,11 +60,19 @@ function generateFiles() {
   const componentName = process.argv[2];
 
   if (!componentName) {
-    console.error('Please provide a component name. Example: "get-form-folder-structure abc-def"');
+    console.error('Please provide a component name. Example: "node create-form-structure.js component-name"');
     process.exit(1);
   }
 
   const parentFolder = `${componentName}-form`;
+
+  // Create the parentFolder directory if it doesn't exist
+  if (!fs.existsSync(parentFolder)) {
+    fs.mkdirSync(parentFolder);
+  }
+
+  // Call the updateRoutes function
+  updateRouteFun.updateRoutes(parentFolder);
   const folders = ['form-component', 'constants', 'services', 'store', 'models', 'key-config', 'fake-test-data'];
   const nestedFolders = {
     services: ['api', 'form'],
@@ -84,7 +97,7 @@ function generateFiles() {
   function generateFileContent(folder, file) {
     switch (folder) {
       case 'form-component':
-        return componentFun.generateFormComponentContent(file, keyNames, keyTypes);
+        return componentFun.generateFormComponentContent(file, keyNames, isKeyDropDown);
       case 'constants':
         return constantFun.generateConstantsContent(file);
       case 'store':
@@ -108,8 +121,6 @@ function generateFiles() {
     }
   }
 
-  // Create parent folder
-  fs.mkdirSync(parentFolder);
 
   // Create subfolders and files
   folders.forEach(folder => {

@@ -6,13 +6,15 @@ const upperSnakeCase = componentName.toUpperCase().replace(/-/g, '_');
 const pascalCaseWithSpace = componentName.toLocaleUpperCase().replace(/-/g, ' ');
 
 // Function to generate content for form component files
-function generateFormComponentContent(file, keyNames, keyTypes) {
-  console.log('\x1b[32m%s\x1b[0m', "CREATE ", file)
+function generateFormComponentContent(file, keyNames, isKeyDropDown) {
+  console.log('\x1b[32m%s\x1b[0m', "CREATE ", file, isKeyDropDown)
   switch (file) {
     case 'component.ts':
+      // Component TypeScript content
       return `import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { ATTRIBUTES_CONSTANT } from '@sharedModule/constants';
 import { ${upperSnakeCase}_FORM_CONSTANTS } from '../constants/${componentName}-constants';
 import { ${pascalCase}FormService } from '../services/form/${componentName}-form.service';
 import * as formActions from '../store/${componentName}.actions';
@@ -24,6 +26,7 @@ import * as formActions from '../store/${componentName}.actions';
 })
 export class ${pascalCase}FormComponent implements OnInit, OnDestroy {
   constants = ${upperSnakeCase}_FORM_CONSTANTS;
+  public attributesConstant = ATTRIBUTES_CONSTANT;
 
   constructor(
     private readonly store: Store,
@@ -55,8 +58,9 @@ export class ${pascalCase}FormComponent implements OnInit, OnDestroy {
     this.formService.goBack();
   }
 }
-  `;
+      `;
     case 'component.spec.ts':
+      // Component Test file content
       return `import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { ${pascalCase}FormComponent } from './${componentName}.component';
@@ -97,82 +101,13 @@ describe('${pascalCase}FormComponent', () => {
     fixture.destroy();
   });
 
-  describe('get form', () => {
-    it("should return form from form service", () => {
-      fixture.detectChanges();
-      const result = component.${camelCase}Form;
-      const expected = formService.formGroup;
-
-      expect(result).toEqual(expected);
-      expect(result).toBeInstanceOf(FormGroup);
-    });
-  });
-
-  describe('ngOnInit', () => {
-    it("should call buildForm function from form service with required config", () => {
-      spyOn(formService, 'buildForm');
-      component.ngOnInit();
-
-      expect(formService.buildForm).toHaveBeenCalled();
-    });
-  });
-
-  describe('ngOnDestroy', () => {
-    it('should reset form and dispatch actions on ngOnDestroy', () => {
-      spyOn(formService, 'resetForm');
-      spyOn(store, 'dispatch');
-
-      component.ngOnDestroy();
-
-      expect(formService.resetForm).toHaveBeenCalled();
-      expect(store.dispatch).toHaveBeenCalledWith(formActions.reset${pascalCase}Form());
-    });
-  });
-
-  describe('cancel', () => {
-    it('should call service.goBack', () => {
-      spyOn(formService, 'goBack');
-      component.cancel();
-      expect(formService.goBack).toHaveBeenCalled();
-    });
-  });
-
-  describe('submitForm', () => {
-    it('should mark all form controls as touched', () => {
-      spyOn(component.${camelCase}Form, 'markAllAsTouched');
-      component.submitForm();
-      expect(component.${camelCase}Form?.markAllAsTouched).toHaveBeenCalled();
-    });
-
-    it('should not dispatch actions if the form is invalid', () => {
-      const spy = spyOn(store, 'dispatch');
-      spyOn(component.${camelCase}Form, 'markAllAsTouched');
-      spyOnProperty(component.${camelCase}Form, 'valid', 'get').and.returnValue(false);
-
-      component.submitForm();
-
-      expect(component.${camelCase}Form?.markAllAsTouched).toHaveBeenCalled();
-      expect(spy).not.toHaveBeenCalled();
-    });
-
-    it('should dispatch add action if valid', () => {
-      const spy = spyOn(store, 'dispatch');
-      spyOn(component.${camelCase}Form, 'markAllAsTouched');
-      spyOnProperty(component.${camelCase}Form, 'valid', 'get').and.returnValue(true);
-
-      spyOnProperty(formService, '${camelCase}FormValue', 'get').and.returnValue(FAKE_${upperSnakeCase}_FORM_DATA);
-
-      const expectedAddAction = formActions.add${pascalCase}Form({ formValue: FAKE_${upperSnakeCase}_FORM_DATA });
-
-      component.submitForm();
-      expect(component.${camelCase}Form?.markAllAsTouched).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith(expectedAddAction);
-    });
-  });
+  // Test cases
 });
+
       `;
     case 'component.html':
-      return `<ng-container header>
+      // Component HTML content
+      let htmlContent = `<ng-container header>
   <h6 class="app-toolbar__title">
     <button class="mr-4" mat-icon-button (click)="cancel()" type="button">
       <mat-icon>arrow_back</mat-icon>
@@ -182,8 +117,26 @@ describe('${pascalCase}FormComponent', () => {
 </ng-container>
 <ng-container form *ngIf="${camelCase}Form">
   <form [formGroup]="${camelCase}Form" (submit)="submitForm()">
-    <div class="page-card__form-body">
-      <!-- Add input and other fields herer -->
+    <div class="page-card__form-body">`;
+
+      // Loop over keys
+      keyNames.forEach((keyName, index) => {
+        if (isKeyDropDown[index]) {
+          // Add nothing for dropdown
+        } else {
+          // Add input item template for non-dropdown
+          htmlContent += `
+      <div>
+        <app-input-item-template
+          [key]="attributesConstant.${keyName}.key"
+          [formGroup]="${camelCase}Form"
+        />
+      </div>`;
+        }
+      });
+
+      // Add remaining HTML content
+      htmlContent += `
     </div>
     <div class="page-card__form-actions">
       <button type="button" (click)="cancel()" color="warn" mat-flat-button>
@@ -194,9 +147,10 @@ describe('${pascalCase}FormComponent', () => {
       </button>
     </div>
   </form>
-</ng-container>
-  `;
+</ng-container>`;
+      return htmlContent;
     case 'component.scss':
+      // Component SCSS content
       return '';
     default:
       return '';

@@ -18,6 +18,9 @@ import { ${pascalCase}FormRoutingModule } from './${componentName}-routing.modul
 import { ${pascalCase}FormComponent } from './form-component/${componentName}.component';
 import { ${pascalCase}Effects } from './store/effects/${componentName}-effects';
 import { MaterialModule } from 'src/app/material/material.module';
+import {
+  InputItemTemplateComponent
+} from '@sharedModule/components/mat-form-input-templates/input-item-template/input-item-template.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +34,7 @@ import { MaterialModule } from 'src/app/material/material.module';
     AsArrayPipe,
     EffectsModule.forFeature([${pascalCase}Effects]),
     MaterialModule,
+    InputItemTemplateComponent
   ],
   providers: [ ]
 })
